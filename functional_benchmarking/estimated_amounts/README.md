@@ -1,0 +1,3 @@
+# Estimated composition
+
+Raw tool outputs from the upstream workflow are located in `tool_inputs`. These raw inputs are cleaned up and prepared for metaquantome by the R files in `scripts`, and the clean files are placed in `mqome_inputs`. The script to run metaQuantome to estimate the GO term fold change is `functional_run_metaquantome.sh`, and metaQuantome outputs are written to `mqome_outputs`. 
