@@ -1,0 +1,388 @@
+---
+title: "Analyze 12 Sample Results - Flash Unipept"
+author: "Caleb Easterly"
+date: "November 16th 2018"
+output:
+    html_document:
+        toc: true
+        depth: 3
+        number_sections: true
+        theme: united
+        highlight: tango
+        toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+library(reshape2)
+library(ggfortify)
+library(gplots)
+library(stringr)
+library(kableExtra)
+```
+
+
+
+
+Colors for all plots:
+```{r}
+# library(RColorBrewer)
+ns_ws_color_values <- c("dodgerblue", "darkorange2")
+volcano_colors <- scale_color_manual(values = c("grey50", "seagreen3"), guide = FALSE)
+ns_ws_colors <- rep(ns_ws_color_values, 12)
+heatmap_colors <- c("#FFF7FB", "#ECE7F2", "#D0D1E6", "#A6BDDB", "#74A9CF",
+                    "#3690C0", "#0570B0", "#045A8D", "#023858")
+```
+
+# Taxonomy
+
+## Most Abundant Taxa
+
+```{r}
+tax_descript <- read.delim('mqome_outputs/tax_filt_out.tab')
+
+tax_samp_columns <- 6:29
+tax_samp_names <- names(tax_descript)[tax_samp_columns]
+ns_names <- tax_samp_names[seq(1, length(tax_samp_names), by = 2)]
+ws_names <-  tax_samp_names[seq(2, length(tax_samp_names), by = 2)]
+
+not_useful <- c('root', 'Bacteria', 'Metazoa', 'Chordata', 'Sus')
+# clean <- filter(tax_descript, !(taxon_name %in% not_useful)) %>%
+#     melt(id.vars = "taxon_name", measure.vars = c('NS_mean', 'WS_mean'))
+
+ns <- filter(tax_descript, !is.na(NS_mean) & !(taxon_name %in% not_useful) & rank == "genus") %>%
+    arrange(-NS_mean) %>%
+    head(10)
+ws <- filter(tax_descript, !is.na(WS_mean) & !(taxon_name %in% not_useful) & rank == "genus") %>%
+    arrange(-WS_mean) %>%
+    head(10)
+    
+ggplot(ns) +
+    geom_bar(aes(x = reorder(taxon_name, -NS_mean), y = 2^NS_mean), stat = "identity") +
+    theme_bw(base_size = 16) + 
+    theme(axis.text.x = element_text(angle = 45, hjust=1, vjust=1)) +
+    labs(x = "Taxon", y = "Total Peptide Intensity",
+         title = "Most Abundant Genera in NS")
+
+ggplot(ws) +
+    geom_bar(aes(x = reorder(taxon_name, -WS_mean), y = 2^WS_mean), stat = "identity") +
+    theme_bw(base_size = 16) + 
+    theme(axis.text.x = element_text(angle = 45, hjust=1, vjust=1)) +
+    labs(x = "Taxon", y = "Total Peptide Intensity",
+         title = "Most Abundant Genera in WS")
+```
+
+<!-- ## Differential Expression Analysis -->
+
+```{r}
+library(ggplot2)
+plt_volcano <- function(df, fc_name = "log2fc_NS_over_WS", xlab = "Log2 Fold Change: WS over NS",
+                        textcol = "id",
+                        ylab = "-Log10 FDR-corrected p value"){
+    df$rev_fc <- (-1) * df[, fc_name]
+    df$neglog10p <- -log10(df[, "corrected_p"])
+    df$id <- df[, textcol]
+    xmax <- max(df$rev_fc) * 1.2
+    xmin <- min(df$rev_fc) * 1.2
+    ymax <- max(df$neglog10p) * 1.2
+    ymin <- min(df$neglog10p) * 1.2
+    ggplot(df, aes(x = rev_fc, y = neglog10p)) + 
+        geom_point(aes(color = de)) + 
+        geom_text(data = subset(df, de),
+                  aes(label = id), check_overlap = TRUE, nudge_y = 0.1,
+                  size = 3) +
+        geom_vline(xintercept = -1, lty = 2, alpha = 0.7) + 
+        geom_vline(xintercept = 1, lty = 2, alpha = 0.7) +
+        geom_hline(yintercept = -log10(0.05), lty = 3) +
+        theme_bw(base_size=16) +
+        volcano_colors +
+        scale_x_continuous(limits = c(xmin, xmax)) +
+        scale_y_continuous(limits = c(ymin, ymax)) +
+        labs(x = xlab, y = ylab)
+}
+
+tax <- read.delim('mqome_outputs/tax_test_out.tab') %>%
+    mutate(de = abs(log2fc_NS_over_WS) > 1 & corrected_p < 0.05)
+
+plt_volcano(tax, textcol = "taxon_name")
+# ggsave("plots/tax_volcano.png", dpi = 700, width = 6, height = 5, units = "in")
+```
+
+Differentially expressed taxa:
+```{r results='asis'}
+knitr::kable(filter(tax, de) %>%
+                 arrange(log2fc_NS_over_WS) %>% select(id, taxon_name, rank,
+                                                       log2fc_NS_over_WS, corrected_p)) %>%
+    kable_styling()
+```
+
+## Principal Components Analysis
+The following functions are used in both PCA and heatmap analysis:
+```{r}
+cor.dist <- function(x){
+    as.dist(1-cor(t(x)))
+}
+hclust.ward <- function(x) {
+    hclust(x,method="ward.D")
+}
+
+
+impute <- function(mat) {
+    mat[mat == 0] <- NA
+    mat[is.na(mat)] <- min(mat, na.rm = TRUE) * 1e-3
+    mat
+}
+
+pad <- function(data, multiple){
+    mind <- min(data)
+    maxd <- max(data)
+    if (mind >= 0){
+        pmind <- mind - mind * (multiple - 1)
+    } else {
+        pmind <- mind + mind * (multiple - 1)
+    }
+    if (maxd >= 0){
+        pmaxd <- maxd * multiple
+    } else {
+        pmaxd <- maxd - maxd * (multiple - 1)
+    }
+    c(pmind, pmaxd)
+}
+
+plt_principal_components <- function(df, samp_columns, cols){
+    mat <- impute(data.matrix(df[, samp_columns]))
+    pr <- prcomp(mat, scale=TRUE, center=TRUE)
+    xpadding <- 1.1
+    ypadding <- 1.3
+    plot(pr$rotation,
+         xlab = paste("PCA1 (",
+                  format(summary(pr)$importance[2, 1]*100, digits = 3), "%)",
+                  sep = ""),
+         ylab = paste("PCA2 (",
+                  format(summary(pr)$importance[2, 2]*100, digits = 3), "%)",
+                  sep = ""),
+         col = cols, pch = 20,
+         xlim = pad(pr$rotation[, 1], xpadding),
+         ylim = pad(pr$rotation[, 2], ypadding),
+         cex = 1.5)
+    text(pr$rotation,
+        labels = str_remove(colnames(mat), 'X'),
+        col = cols,
+        pos = 3,
+        cex = 1)
+    grid()
+    return(pr)
+}
+
+library(RColorBrewer)
+plt_heatmap <- function(df, samp_columns, cols, heatmap_colors = brewer.pal(name = 'PuBu', n = 9)){
+    # impute
+    mat <- impute(data.matrix(df[, samp_columns]))
+    
+    # scale rows
+    datmat.scale <- t(apply(mat, 1, scale))
+    rownames(datmat.scale) <- df$id
+    colnames(datmat.scale) <- str_replace(colnames(df[, samp_columns]), "Intensity\\.(.*)", "\\1")
+    par(mar = rep(5, 4))
+    feature.dend <- as.dendrogram(hclust.ward(cor.dist(datmat.scale)))
+    sample.dend <- as.dendrogram(hclust.ward(cor.dist(t(datmat.scale))))
+    heatmap.2(datmat.scale,
+              Colv = sample.dend,
+              Rowv = feature.dend,
+              distfun = cor.dist,
+              hclustfun = hclust.ward,
+              trace="none",
+              col = heatmap_colors,
+              margins = c(10, 10),
+              cexRow = 0.3,
+              ColSideColors = ns_ws_colors,
+              density.info = "none")
+}
+
+make_df_list_from_pca <- function(pca_res, ind_list){
+    pointmat <- data.frame(pca_res$rotation[, 1:2])
+    grps <- lapply(ind_list, function(i) pointmat[i, ])
+    return(grps)
+}
+grps <- list(seq(1, 24, by = 2),
+             seq(2, 24, by = 2))
+
+sep_n <- function(clust){
+    # clust is a list of dataframes, where the columns in each dataframe are the
+    # intensities for each experimental condition
+    nclust <- length(clust)
+    means <- lapply(clust, colMeans)
+    possible_dists <- combn(1:nclust, 2)
+    n_possible_dists <- ncol(possible_dists)
+    dists <- rep(0, n_possible_dists)
+    for (i in 1:n_possible_dists){
+        comb <- possible_dists[, i]
+        dists[i] <- sum((means[[comb[1]]] - means[[comb[2]]])^2)
+    }
+    avg_dist <- mean(dists)
+    within_variance <- sapply(1:nclust, function(i) mean((clust[[i]] - means[[i]])^2))
+    avg_dist / sum(within_variance)
+}
+
+```
+
+```{r}
+tax_descript <- read.delim('mqome_outputs/tax_filt_out.tab')
+# ge3 <- (rowSums(!is.na(tax_descript[, ns_names])) >= 3) & (rowSums(!is.na(tax_descript[, ws_names])) >= 3)
+# tax_descript <- tax_descript[ge3, ]
+
+# principal components, tax
+tpr <- plt_principal_components(tax_descript, tax_samp_columns, ns_ws_colors)
+tax_df_grps <- make_df_list_from_pca(tpr, grps)
+tax_sep <- sep_n(tax_df_grps)
+tax_sep
+```
+
+
+## Heatmap
+
+```{r fig.width=14, fig.height=14}
+# heatmap, tax
+plt_heatmap(tax_descript, tax_samp_columns, ns_ws_cols)
+```
+
+
+# Function - GO
+
+## Volcano
+```{r}
+func <- read.delim('mqome_outputs/func_full_test_out.tab') %>%
+    mutate(de = abs(log2fc_NS_over_WS) > 1 & corrected_p < 0.05)
+fc <- "log2fc_NS_over_WS"
+p <- "corrected_p"
+plt_volcano(func)
+
+# ggsave("plots/func_full_volcano.png",dpi = 700, width = 10, height = 8, units = "in")
+```
+
+### Differentially expressed GO terms
+```{r results='asis'}
+knitr::kable(filter(func, de) %>%
+                 arrange(log2fc_NS_over_WS) %>% select(id, name, namespace, log2fc_NS_over_WS)) %>%
+    kable_styling()
+```
+
+## Principal Components
+
+```{r}
+# principal components, function
+full_func_descript <- read.delim('mqome_outputs/func_full_filt_out.tab')
+
+fpr <- plt_principal_components(full_func_descript, 6:29, ns_ws_colors)
+
+df_list <- make_df_list_from_pca(fpr, grps)
+sep_n(df_list)
+```
+
+<!-- Calculate centers (TODO) -->
+<!-- ```{r} -->
+<!-- df.func.x <- as.data.frame(pr_func$x) -->
+<!-- df.func.x$groups <- rep(c("WS", "NS"), 12) -->
+<!-- pca.centroids <- aggregate(df.wine.x[,1:13], list(Type = df.wine.x$groups), mean) -->
+<!-- ``` -->
+
+## Heatmap
+```{r fig.width=14, fig.height=14}
+# heatmap, function
+plt_heatmap(full_func_descript, 6:29, ns_ws_colors)
+```
+
+
+# Function-taxonomy (filt)
+
+```{r}
+tf <- read.delim('mqome_outputs/tf_filt_out.tab')
+```
+
+## Veillonellaceae family
+
+<!-- ## COG Category G  -->
+```{r}
+go_v <- filter(tf, taxon_name=='Veillonellaceae') %>%
+    filter(namespace == "biological_process") %>%
+    filter(name != "biological_process") %>%
+    mutate(propNS = 2^NS_mean / sum(2^NS_mean, na.rm = TRUE),
+           propWS = 2^WS_mean / sum(2^WS_mean, na.rm = TRUE),
+           l2fc = log2(propWS/propNS)) %>%
+    select(go_id, name, propNS, propWS, l2fc)
+go_v_clean <- go_v %>%
+    filter(propNS >= 0.01 & propWS >= 0.01) %>%
+    select(name, propNS, propWS) %>%
+    melt()
+ggplot(go_v_clean) +
+    geom_bar(aes(x = reorder(name, -value), y = value, fill=variable), stat="identity",
+             position="dodge")+
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1)) +
+    labs(x = "Biological Process GO Term", y = "Proportion of total peptide intensity",
+         title = "Veillonellaceae")
+```
+
+```{r results='asis'}
+arrange(go_veillonellaceae, -l2fc) %>%
+    knitr::kable() %>% kable_styling()
+```
+
+
+
+## Streptococcae family
+
+<!-- ## COG Category G  -->
+```{r}
+go_strep <- filter(tf, taxon_name == "Streptococcaceae") %>%
+    filter(namespace == "biological_process") %>%
+    filter(name != "biological_process") %>%
+    mutate(propNS = 2^NS_mean / sum(2^NS_mean, na.rm = TRUE),
+           propWS = 2^WS_mean / sum(2^WS_mean, na.rm = TRUE),
+           l2fc = log2(propWS/propNS)) %>%
+    select(go_id, name, propNS, propWS, l2fc) %>%
+    arrange(l2fc)
+```
+
+```{r results='asis'}
+arrange(go_strep, -propNS) %>%
+    knitr::kable() %>% kable_styling()
+```
+
+### Barplot
+
+```{r}
+go_strep_clean <- go_strep %>%
+    filter(propNS >= 0.01 & propWS >= 0.01) %>%
+    select(name, propNS, propWS) %>%
+    melt()
+ggplot(go_strep_clean) +
+    geom_bar(aes(x = reorder(name, -value), y = value, fill=variable), stat="identity",
+             position="dodge")+
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1)) +
+    labs(x = "Biological Process GO Term", y = "Proportion of total peptide intensity",
+         title = "Streptococcaceae")
+```
+
+
+## Carbohydrate metabolic process
+
+Let's look at the distribution of families for carbohydrate metabolic process.
+
+```{r}
+suc_props <- filter(tf, go_id == "GO:0005975") %>%
+    mutate(propNS = 2^NS_mean / sum(2^NS_mean, na.rm = TRUE),
+           propWS = 2^WS_mean / sum(2^WS_mean, na.rm = TRUE),
+           l2fc = log2(propWS/propNS)) %>%
+    select(taxon_name, propNS, propWS, l2fc) %>%
+    filter(!is.na(l2fc)) %>%
+    arrange(-l2fc)
+```
+
+```{r results='asis'}
+knitr::kable(suc_props) %>% kable_styling()
+```
+
