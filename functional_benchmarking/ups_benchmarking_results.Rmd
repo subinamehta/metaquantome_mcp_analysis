@@ -3,8 +3,8 @@ title: "UPS Benchmarking"
 author: "Caleb Easterly"
 date: "November 28, 2018"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r}
