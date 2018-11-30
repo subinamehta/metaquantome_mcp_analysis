@@ -102,7 +102,7 @@ metaQuantome can be used to identify the most abundant taxa in an experiment, an
 
 ## Expand 
 
-metaQuantome requires information about each of the samples, and which experimental conditions they belong to. The names are of the samples also should be the column names in the intensity file. For example, if you have two experimental conditions "A" and "B", each with two samples that you're calling "A1", "A2", and "B1", "B2", respectively, the columns of your intensity file should be `peptide` (or another peptide column name), `A1`,`A2`,`B1`, and `B2`. Then, the `--samps` argument gives metaQuantome the information about which samples below to which groups. There are two ways to provide this information to metaQuantome:
+metaQuantome requires information about each of the samples, and which experimental conditions they belong to. The names of the samples also should be the column names in the intensity file. For example, if you have two experimental conditions "A" and "B", each with two samples that you're calling "A1", "A2", and "B1", "B2", respectively, the columns of your intensity file should be `peptide` (or another peptide column name), `A1`,`A2`,`B1`, and `B2`. Then, the `--samps` argument gives metaQuantome the information about which samples below to which groups. There are two ways to provide this information to metaQuantome:
 
 - a JSON string
 - a tabular file
@@ -177,6 +177,7 @@ metaquantome filter \
 ```
 
 Here, we're requiring that each term satisfy the following conditions:
+
 - Evidenced by at least 2 peptides in at least 1 sample of each group
 - Has 0 sample children or at least 2 sample children in at least 1 sample of each group (see paper for definition of sample children)
 - Was quantified in at least 3 samples of each group
@@ -243,7 +244,7 @@ metaquantome viz \
     --calculate_sep
 ```
 
-The `--calculate_sep`` argument tells metaQuantome to calculate the ratio of the between-cluster variance to the within-cluster variance, where higher indicates a better separation of clusters (see the main paper for details). The separation is included in the plot title.
+The `--calculate_sep` argument tells metaQuantome to calculate the ratio of the between-cluster variance to the within-cluster variance, where higher indicates a better separation of clusters (see the main paper for details). The separation is included in the plot title.
 
 <img src='mqome_outputs/imgs/tax_pca.png'/>
 
@@ -268,7 +269,7 @@ Now, let's go through a differential expression analysis with metaQuantome. We'l
 
 ## Expand
 
-```{bash results="hide", echo=3:12}
+```{bash results="hide", echo=2:11}
 source ~/miniconda3/bin/activate mqome
 metaquantome expand \
     --mode f \
@@ -303,7 +304,7 @@ metaquantome filter \
 
 ## Stat
 
-In `stat`, we use the tabular result from `filter` and append fold changes, and the p-values obtained from t-tests. For additional options, see `metaquantome stat -h`
+In `stat`, we use the tabular result from `filter` to append fold changes and the p-values obtained from t-tests. For additional options, use `metaquantome stat -h`
 
 ```{bash results="hide",echo=-1}
 source ~/miniconda3/bin/activate mqome
