@@ -1,0 +1,116 @@
+---
+title: "Mock Microbial Comparison Results"
+author: "Caleb Easterly"
+date: "October 30, 2018"
+output: html_document
+---
+
+```{r}
+knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE)
+```
+
+# Get True Results
+The true protein amounts were expanded with metaQuantome. 
+```{r}
+true_expanded <- read.delim('true_composition/mqome_outputs/true_out.tab')
+```
+
+# Estimate Intensity With Summarization
+
+```{r}
+library(plyr)
+library(dplyr)
+flash_results <- read.delim('estimated_composition/mqome_inputs/flash.tab',
+							stringsAsFactors = FALSE)
+unipept_results <- read.delim('estimated_composition/mqome_inputs/tax.tab',
+							  stringsAsFactors = FALSE)
+taxa_with_int <- left_join(unipept_results, flash_results, by = "peptide") %>%
+	select(lca, starts_with("Run"))
+taxa_with_int$mean_int <- rowMeans(taxa_with_int[, -1], na.rm = TRUE)
+
+summarization_estimates <- taxa_with_int %>%
+	group_by(lca) %>%
+	summarise(int = sum(mean_int, na.rm=TRUE))
+```
+
+# Estimate Intensity with metaQuantome
+
+```{r}
+# read metaquantome results
+metaquantome_results <- read.delim('estimated_composition/mqome_outputs/tax_out.tab')
+
+library(reshape2)
+
+true <- read.delim('true_composition/mqome_outputs/true_out.tab')
+# original_abund <- read.delim('true_composition/true.tab')
+```
+
+
+```{r}
+joined_mqome <- left_join(true, metaquantome_results, by = "taxon_name",
+						  suffix = c(".true", ".est_int")) %>%
+	select(taxon_name, true_abund = g1_mean.true, int_abund = g1_mean.est_int)
+
+joined_orig <- left_join(true, summarization_estimates, by = c("taxon_name" = "lca")) %>%
+	mutate(logint = log2(int)) %>%
+	select(taxon_name, true_abund = g1_mean, lca_sum_abund = logint)
+
+all_together <- join_all(list(joined_mqome, joined_orig), by = c("taxon_name", "true_abund"))
+```
+
+### Scale the dataframe
+
+The true abundances and the estimated abundances are all on different scales, so I use `scale` to ensure they all have a mean of 0 and an standard deviation of 1.
+
+```{r}
+scaled <- data.frame(taxon_name = all_together$taxon_name,
+					 scale(all_together[, 2:4]))
+# colMeans(scaled[, -1], na.rm = TRUE)
+# apply(scaled[, -1], 2, function(x) sd(x, na.rm=T))
+```
+
+### Mean of Squared Errors
+
+Now that I've scaled the result, I calculate the average distance from the true abundances. I use average because there is a different number of non-missing intensities for spectral counts and precursor intensities.
+
+Intensity:
+```{r}
+int_err <- with(scaled, mean((true_abund - int_abund)^2, na.rm = TRUE))
+```
+
+Original Intensity:
+```{r}
+lca_err <- with(scaled, mean((true_abund - lca_sum_abund)^2, na.rm = TRUE))
+```
+
+```{r}
+errs <- data.frame("analysis" = c("metaquantome", "lca (intensity)", "true"),
+				   "ntaxa" = c(sum(!is.na(scaled[, "int_abund"])),
+				   			sum(!is.na(scaled[, "lca_sum_abund"])),
+				   			nrow(scaled)),
+				   "mse" = c(int_err, lca_err, '-'))
+library(knitr)
+library(kableExtra)
+errs %>%
+	kable() %>%
+	kable_styling()
+```
+
+
+<!-- ### Plotting -->
+
+<!-- ```{r} -->
+<!-- library(ggplot2) -->
+<!-- ms1 <- "Precursor Intensity" -->
+<!-- spec <- "Spectral Counting" -->
+<!-- lca_sum <- "Sum on LCA" -->
+<!-- ggplot(scaled) + -->
+<!-- 	geom_point(aes(x = true_abund, y = int_abund, col = ms1)) + -->
+<!-- 	geom_point(aes(x = true_abund, y = mq_sc_abund, col=spec)) + -->
+<!-- 	geom_abline(intercept = 0, slope = 1) + -->
+<!-- 	geom_smooth(aes(x = true_abund, y = int_abund, col = ms1), method = "lm", se=FALSE) + -->
+<!-- 	geom_smooth(aes(x = true_abund, y = mq_sc_abund, col = spec), method = "lm", se=FALSE) + -->
+<!-- 	geom_smooth(aes(x = true_abund, y = lca_sum_abund, col = lca_sum), method = "lm", se=FALSE) + -->
+<!-- 	theme_bw() + -->
+<!-- 	labs(x = "Scaled True Abundance", y = "Scaled Estimated Abundance") -->
+<!-- ``` -->

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+source ~/miniconda3/bin/activate mqome
+
+# location of this project
+cd ~/Projects/Griffin_lab_work/metaquantome_mcp_analysis/taxonomic_benchmarking/true_composition
+
+# taxonomy
+metaquantome expand \
+	--nopep \
+	--nopep_file mqome_inputs/true.tab \
+    --mode t \
+    --samps mqome_inputs/true_samples.tab \
+    --tax_colname taxid \
+    --outfile mqome_outputs/true_out.tab
+
+
+
