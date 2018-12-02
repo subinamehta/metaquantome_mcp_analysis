@@ -1,29 +1,31 @@
 #!/bin/bash
 
-source ~/miniconda3/bin/activate metaquantome
+source ~/miniconda3/bin/activate mqome
 
-# location of metaquant script
-mq=~/Projects/Griffin_lab_work/functional_taxonomic_quant/metaquantome/metaquantome/cli.py
+# run from oral_microbiome_case study
 
-cd ~/Projects/Griffin_lab_work/metaquantome_mcp_analysis/oral_microbiome_case_study/metaquantome_inputs
+# this is only for function, because taxonomy is large
+# and updates automatically
+f_ddir=../cached_databases
 
-owt=../mqome_outputs
+owt=mqome_outputs
+inp=metaquantome_inputs
 
 # taxonomy
-python $mq expand \
+metaquantome expand \
     --mode t \
-    --samps rudney_samples.tab \
-    --int_file flash_norm.tab \
+    --samps $inp/rudney_samples.tab \
+    --int_file $inp/flash_norm.tab \
     --pep_colname_int peptide \
     --pep_colname_tax peptide \
     --outfile $owt/tax_descript_out.tab \
-    --tax_file tax.tab \
+    --tax_file $inp/tax.tab \
     --tax_colname lca
 
-python $mq filter \
+metaquantome filter \
     --expand_file $owt/tax_descript_out.tab \
     --mode t \
-    --samps rudney_samples.tab \
+    --samps $inp/rudney_samples.tab \
     --min_peptides 2 \
     --min_pep_nsamp 5 \
     --min_children_non_leaf 2 \
@@ -31,31 +33,31 @@ python $mq filter \
     --qthreshold 5 \
     --outfile $owt/tax_filt_out.tab
 
-python $mq stat \
-    --mode 't' \
-    --samps rudney_samples.tab \
+metaquantome stat \
+    --mode t \
+    --samps $inp/rudney_samples.tab \
     --file $owt/tax_filt_out.tab \
     --outfile $owt/tax_test_out.tab
 
-
-
 # function full descriptive
-python $mq expand \
-     --mode f \
-     --ontology go \
-     --samps rudney_samples.tab \
-     --int_file flash_results.tab \
-     --pep_colname_int peptide \
-     --pep_colname_func peptide \
-     --outfile $owt/func_full_descript_out.tab \
-     --func_file func.tab \
-     --func_colname go
+metaquantome expand \
+	--data_dir $f_ddir \
+	--mode f \
+	--ontology go \
+	--samps $inp/rudney_samples.tab \
+	--int_file $inp/flash_norm.tab \
+	--pep_colname_int peptide \
+	--func_file $inp/func.tab \
+	--func_colname go \
+	--pep_colname_func peptide \
+	--outfile $owt/func_full_descript_out.tab
 
-python $mq filter \
+
+metaquantome filter \
     --expand_file $owt/func_full_descript_out.tab \
     --mode f \
     --ontology go \
-    --samps rudney_samples.tab \
+    --samps $inp/rudney_samples.tab \
     --min_peptides 2 \
     --min_pep_nsamp 5 \
     --min_children_non_leaf 2 \
@@ -63,36 +65,51 @@ python $mq filter \
     --qthreshold 5 \
     --outfile $owt/func_full_filt_out.tab
 
-python $mq stat \
+metaquantome stat \
     --mode 'f' \
-    --ontology 'go' \
-    --samps rudney_samples.tab \
+    --ontology go \
+    --samps $inp/rudney_samples.tab \
     --file $owt/func_full_filt_out.tab \
     --outfile $owt/func_full_test_out.tab
 
 # taxonomy-function
-python $mq expand \
-     --mode taxfn \
-     --ontology go \
-     --samps rudney_samples.tab \
-     --int_file flash_results.tab \
-     --pep_colname_int peptide \
-     --pep_colname_func peptide \
-     --pep_colname_tax peptide \
-     --outfile $owt/tf_descript_out.tab \
-     --func_file func.tab \
-     --func_colname go \
-     --tax_file tax.tab \
-     --tax_colname lca \
-     --ft_tar_rank family \
-     --slim_down
+# use cached func data dir, default tax dir (can't cache)
+metaquantome expand \
+	--ft_func_data_dir $f_ddir \
+	--mode ft \
+	--ontology go \
+	--samps $inp/rudney_samples.tab \
+	--int_file $inp/flash_norm.tab \
+	--pep_colname_int peptide \
+	--func_file $inp/func.tab \
+	--func_colname go \
+	--pep_colname_func peptide \
+	--slim_down \
+	--tax_file $inp/tax.tab \
+	--tax_colname lca \
+	--ft_tar_rank genus \
+	--pep_colname_tax peptide \
+	--outfile $owt/tf_descript_out.tab
 
-python $mq filter \
+metaquantome filter \
     --expand_file $owt/tf_descript_out.tab \
-    --mode taxfn \
-    --samps rudney_samples.tab \
-    --min_peptides 2 \
-    --min_pep_nsamp 5 \
-    --qthreshold 5 \
-    --outfile $owt/tf_filt_out.tab \
+    --mode ft \
+    --samps $inp/rudney_samples.tab \
+    --min_peptides 1 \
+    --min_pep_nsamp 1 \
+    --qthreshold 3 \
+    --outfile $owt/tf_filt_out.tab
+
+# visualize
+./visualize_rudney_flash_unipept.sh
+
+Rscript -e "library(knitr); knit('rudney_plots.Rmd')"
+Rscript -e "library(rmarkdown); render('rudney_plots.md')"
+
+# summaries
+Rscript summaries/proportions.R
+Rscript summaries/make_taxonomy_table_supplement.R
+Rscript summaries/make_function_table_supplement.R
+
+
 
