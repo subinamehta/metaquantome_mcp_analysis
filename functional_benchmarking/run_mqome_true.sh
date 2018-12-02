@@ -6,6 +6,7 @@ source ~/miniconda3/bin/activate mqome
 
 # taxonomy
 metaquantome expand \
+    --data_dir ../cached_databases \
 	--nopep \
 	--nopep_file true_amounts/mqome_inputs/true.tab \
     --mode f \
