@@ -1,7 +1,7 @@
 ---
 title: "Supplementary Document 1: metaQuantome tutorial"
 author: "Caleb W. Easterly, Ray Sajulga, Subina Mehta, James Johnson, Praveen Kumar, Shane Hubler, Bart Mesuere, Joel Rudney, Timothy J. Griffin, Pratik D. Jagtap"
-date: "November 30, 2018"
+date: "December 3, 2018"
 output:
     html_document:
         toc: true
