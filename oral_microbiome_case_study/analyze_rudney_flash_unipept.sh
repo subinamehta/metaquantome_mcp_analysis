@@ -103,8 +103,8 @@ metaquantome filter \
 # visualize
 ./visualize_rudney_flash_unipept.sh
 
-Rscript -e "library(knitr); knit('rudney_plots.Rmd')"
-Rscript -e "library(rmarkdown); render('rudney_plots.md')"
+Rscript -e "library(knitr); knit('supporting2_all_visualizations.Rmd')"
+Rscript -e "library(rmarkdown); render('supporting2_all_visualizations.md')"
 
 # summaries
 Rscript summaries/proportions.R

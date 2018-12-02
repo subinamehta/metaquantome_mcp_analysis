@@ -7,5 +7,5 @@ f <- read.delim('mqome_outputs/func_full_test_out.tab', stringsAsFactors = FALSE
 	arrange(-log2fc_WS_over_NS) %>%
 	select(id, name, namespace, log2fc_WS_over_NS, corrected_p)
 
-write.table(f, file="summaries/differentially_expressed_go_terms.tab",
+write.table(f, file="summaries/supporting4_differentially_expressed_go_terms.tab",
 			sep="\t", row.names=FALSE, quote=FALSE)

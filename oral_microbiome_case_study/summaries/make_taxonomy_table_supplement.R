@@ -8,5 +8,5 @@ t <- read.delim('mqome_outputs/tax_test_out.tab', stringsAsFactors = FALSE) %>%
 	arrange(-log2fc_WS_over_NS) %>%
 	select(taxon_name, log2fc_WS_over_NS, corrected_p)
 
-write.table(t, file="summaries/differentially_expressed_taxa.tab",
+write.table(t, file="summaries/supporting3_differentially_expressed_taxa.tab",
 			sep="\t", row.names=FALSE, quote=FALSE)

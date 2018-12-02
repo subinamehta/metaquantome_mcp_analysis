@@ -1,0 +1,23 @@
+go_id	name	namespace	propWS	propNS
+GO:0005975	carbohydrate metabolic process	biological_process	0.151106785489915	0.0816277049951237
+GO:0006091	generation of precursor metabolites and energy	biological_process	0.00155070178896488	0.00583082378455279
+GO:0006259	DNA metabolic process	biological_process	0.0191833360859462	0.00578770409761138
+GO:0006351	transcription, DNA-templated	biological_process	0.0102882097910418	0.00577596975590979
+GO:0006412	translation	biological_process	0.0283903905893068	0.0199169654756976
+GO:0006457	protein folding	biological_process	0.0626494231832365	0.0194495630315404
+GO:0006629	lipid metabolic process	biological_process	0.00853206629002448	0.00606807236034113
+GO:0006807	nitrogen compound metabolic process	biological_process	0.120910908203752	0.23149083871072
+GO:0006810	transport	biological_process	0.0576644217684306	0.0756061895805292
+GO:0006950	response to stress	biological_process	0.0256810871424383	0.00218892979329135
+GO:0007155	cell adhesion	biological_process	0.000989513036943027	0.000586784228757275
+GO:0008150	biological_process	biological_process	0.0897674663400327	0.0789562160338068
+GO:0008152	metabolic process	biological_process	0.164720971265783	0.275984834380608
+GO:0009058	biosynthetic process	biological_process	0.027716203442191	0.0179401831932441
+GO:0016070	RNA metabolic process	biological_process	0.0727375439469259	0.0239964582421718
+GO:0016310	phosphorylation	biological_process	0.000516146329426569	0.00045772789595823
+GO:0019222	regulation of metabolic process	biological_process	0.0320956583439365	0.0395525857925112
+GO:0044281	small molecule metabolic process	biological_process	0.0695295601562077	0.0610284214693167
+GO:0045454	cell redox homeostasis	biological_process	0.01615957707982	0.00502260838942144
+GO:0065003	protein-containing complex assembly	biological_process	0.00384603064208746	0.00269125438238368
+GO:0071103	DNA conformation change	biological_process	0.00491609487430639	0.000387076661238738
+GO:0071840	cellular component organization or biogenesis	biological_process	0.0310479042092835	0.0396530877452648
