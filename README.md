@@ -6,12 +6,12 @@ On this page, we provide further resources for 1) reproducing the analysis from 
 
 We have made two tutorials available:
 
-1. Command line interface tutorial
-2. Galaxy tutorial
+1. [Command line interface tutorial](cli_tutorial/supporting1_tutorial.html)
+2. [Galaxy tutorial](galaxy_tutorial/tutorial.md)
 
 ## Analysis scripts
 
-All of the analyses from the manuscript may be reproduced by cloning the Github repository at https://github.com/galaxyproteomics/metaquantome_mcp_analysis. 
+All of the analyses from the manuscript may be reproduced by cloning the [Github repository](https://github.com/galaxyproteomics/metaquantome_mcp_analysis).
 
 To reproduce the analyses, you can install metaQuantome v0.99.2 into a conda environment (called `mqome` in this repository) with the following command.
 
