@@ -2,14 +2,13 @@
 
 ## Accessing the Metaproteomics Gateway
 
-Go to https://z.umn.edu/metaproteomicsgateway.  This website is one of the public Galaxy gateways hosted on Jetstream (https://jetstream-cloud.org/), a cloud-based resource for scientific computing and research. The Galaxy installation on this website is maintained by the Galaxy-P team at the University of Minnesota.
+Go to <https://z.umn.edu/metaproteomicsgateway>.  This website is one of the public Galaxy gateways hosted on Jetstream (<https://jetstream-cloud.org/>), a cloud-based resource for scientific computing and research. The Galaxy installation on this website is maintained by the Galaxy-P team at the University of Minnesota.
 
 ## Registering
 
 This Galaxy instance requires that all users register to access tools and workflows.  To register, perform the following steps:
 
-1. Click on the  "Login or Register" tab and click on "Register". Enter an email address, password and public name of choosing. [NOTE: Users choosing to remain anonymous can enter an email such as "guest@galaxyp.org", along with a password and a public name of your choosing. Also, note that this instance is for training purposes only, not for long-term use or testing with large datasets and the passwords are non-
-  retrievable]
+1. Click on the  "Login or Register" tab and click on "Register". Enter an email address, password and public name of choosing. [NOTE: Users choosing to remain anonymous can enter an email such as "guest@galaxyp.org", along with a password and a public name of your choosing. Also, note that this instance is for training purposes only, not for long-term use or testing with large datasets and the passwords are non-retrievable]
 
 2. Once registered, click on the "User" tab and click on "Login" with your user credentials.
 
@@ -18,7 +17,7 @@ The Galaxy interface is divided into three panels: a *Tool pane* on the left sid
 
 ## Import data
 
-The data used are a downsampled version of data from Rudney, et al. *Microbiome* [doi:  10.1186/s40168-015-0136-z](https://dx.doi.org/10.1186/s40168-015-0136-z), using 3 pairs and 1000 peptides (and, as such, these results are not representative of the full dataset). For more detail about the data, see the *MCP* manuscript associated with this tutorial.
+The data used are a downsampled version of data from Rudney, et al. *Microbiome* [doi:10.1186/s40168-015-0136-z](https://dx.doi.org/10.1186/s40168-015-0136-z), using 3 pairs and 1000 peptides (and, as such, these results are not representative of the full dataset). For more detail about the data, see the *MCP* manuscript associated with this tutorial.
 
 In Galaxy, to run any workflow, the appropriate data must be provided to the workflow. Hence, the first step is to import the required input datasets.  To access the inputs for this demonstration, we have provided one history containing all the inputs required to run the tool. Let’s begin by importing the history,  click on "Shared Data" &rarr; "Histories" &rarr; " **metaQuantome MCP tutorial data**". Then, click on to import the history that contains all the input files.  The history consists of four tabular datasets: the samples file (`samples.tab`), functional annotation file (`func.tab`), quantification file (`int.tab`) and taxonomy annotation file (`tax.tab`). You can preview the files in the *Center pane* by clicking on the eye icon:
 
@@ -56,10 +55,9 @@ Finally, click "Run Workflow". To see the new history with the results, click "S
 ### Workflow 2: Cluster Analysis of Taxonomy
 To run the next workflow, we must first go to the input data history. If you are in a different history, go back to "Imported: metaquantome MCP tutorial data", which you can find by clicking the gear icon in the History pane and going to "Saved Histories":
 
-![without click](images/back_to_inputs_1.png) &rarr; *click* &rarr;
 ![with click](images/back_to_inputs_2.png)
 
-  Then, import the workflow "metaQuantome workflow 2: cluster analysis of taxonomy". The inputs are the same as in the first workflow. After running `expand` and `filter`, this workflow creates a PCA plot and the second creates a heatmap.
+Then, import the workflow "metaQuantome workflow 2: cluster analysis of taxonomy". The inputs are the same as in the first workflow. After running `expand` and `filter`, this workflow creates a PCA plot and the second creates a heatmap.
 
 ### Workflow 3: Differentially Expressed Functions
 In workflow 3, we perform functional differential expression analysis with metaQuantome. For this, import workflow 3, "metaQuantome workflow 3: differentially expressed functions". The inputs for workflow 3 are `func.tab` (the "Function annotation file"), `samples.tab` (the "Samples file"), and `int.tab` (the "Intensity file"). After selecting the correct inputs, the center pane should look like this:
@@ -83,7 +81,7 @@ The Center Pane should look like this when you are ready to run:
 Now, click "Run workflow". The outputs are barplots showing the taxonomic distribution of the GO term for "carbohydrate metabolic process" (GO:0005975) for NS (blue) and WS (orange)
 
 ## Contact
-If you have any problems with the server or the workflows, please contact the Galaxy-P team by posting an issue on https://github.com/galaxyproteomics/tools-galaxyp/issues
+If you have any problems with the server or the workflows, please contact the Galaxy-P team by posting an issue on <https://github.com/galaxyproteomics/tools-galaxyp/issues>
 
 ## Other training materials
 
