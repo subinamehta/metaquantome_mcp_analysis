@@ -48,7 +48,7 @@ By clicking on each of the steps, you can see the parameters that are used in th
 
 Now, go back the the "Workflow" tab. Click the dropdown arrow and select the "Run" option. The workflow will now open in the Main viewing pane. First, select "Yes" for "Send results to a new history", which will keep the input data history clean (for all workflows, you need to be in the input data history when you run it). The default name is fine. Next, to run the workflow, appropriate inputs have to be selected. For the "Taxonomic annotation file" field, select the `tax.tab` file. For the "Samples" file field, select `samples.tab`. Finally, for the "Intensity file" field, select the `int.tab` file. The center pane should now look like this:
 
-![Ready to run!](images/ready_to_run_w1.png)
+![Ready to run!](images/workflow1.png)
 
 Finally, click "Run Workflow". To see the new history with the results, click "Switch to that history" on the page that loads after running the workflow. The workflow has two main outputs: a plot of the highest-abundance species for the no sucrose condition (NS) and another plot for the with sucrose condition (WS). Again, all of the files can be viewed by clicking the eye image ![eye image](images/eye_icon.png).
 
@@ -62,7 +62,7 @@ Then, import the workflow "metaQuantome workflow 2: cluster analysis of taxonomy
 ### Workflow 3: Differentially Expressed Functions
 In workflow 3, we perform functional differential expression analysis with metaQuantome. For this, import workflow 3, "metaQuantome workflow 3: differentially expressed functions". The inputs for workflow 3 are `func.tab` (the "Function annotation file"), `samples.tab` (the "Samples file"), and `int.tab` (the "Intensity file"). After selecting the correct inputs, the center pane should look like this:
 
-![ready to run workflow 3](images/ready_to_run_w3.png)
+![ready to run workflow 3](images/workflow3.png)
 
 The outputs from this workflow are volcano plots, which plots the log2 fold change against the -log10 p value for each GO term. The green points are those GO terms that are below 5% FDR and had a greater-than-2-fold change. The workflow outputs 3 volcano plots, showing different options available within metaQuantome: adding text to the differentially expressed terms and plotting biological process, molecular function, and cellular component separately.
 
@@ -76,7 +76,7 @@ The fourth workflow analyzes function and taxonomy together. First, import "meta
 
 The Center Pane should look like this when you are ready to run:
 
-![ready to run workflow 4](images/ready_to_run_w4.png)
+![ready to run workflow 4](images/workflow4.png)
 
 Now, click "Run workflow". The outputs are barplots showing the taxonomic distribution of the GO term for "carbohydrate metabolic process" (GO:0005975) for NS (blue) and WS (orange)
 
