@@ -21,7 +21,7 @@ The data used are a downsampled version of data from Rudney, et al. *Microbiome*
 
 In Galaxy, to run any workflow, the appropriate data must be provided to the workflow. Hence, the first step is to import the required input datasets.  To access the inputs for this demonstration, we have provided one history containing all the inputs required to run the tool. Let’s begin by importing the history,  click on "Shared Data" &rarr; "Histories" &rarr; " **metaQuantome MCP tutorial data**". Then, click on to import the history that contains all the input files.  The history consists of four tabular datasets: the samples file (`samples.tab`), functional annotation file (`func.tab`), quantification file (`int.tab`) and taxonomy annotation file (`tax.tab`). You can preview the files in the *Center pane* by clicking on the eye icon:
 
-![eye image](images/eye_location.png).
+![eye image](images/View_data.png).
 
 ## Running the workflows
 
