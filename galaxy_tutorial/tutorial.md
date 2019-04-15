@@ -42,13 +42,13 @@ First, we'll visualize the steps in the workflow. Go to the "Workflow" tab, and 
 
 Then, select the "Edit" option. This will display the *Workflow Editor*, which offers the best view of a workflow and is one place that workflows can be built.
 
-![workflow editor](images/workflow_editor.png)
+![workflow editor](images/workflow1.png)
 
 By clicking on each of the steps, you can see the parameters that are used in that run of the tool.
 
 Now, go back the the "Workflow" tab. Click the dropdown arrow and select the "Run" option. The workflow will now open in the Main viewing pane. First, select "Yes" for "Send results to a new history", which will keep the input data history clean (for all workflows, you need to be in the input data history when you run it). The default name is fine. Next, to run the workflow, appropriate inputs have to be selected. For the "Taxonomic annotation file" field, select the `tax.tab` file. For the "Samples" file field, select `samples.tab`. Finally, for the "Intensity file" field, select the `int.tab` file. The center pane should now look like this:
 
-![Ready to run!](images/workflow1.png)
+![Ready to run!](images/running_workflow1.png)
 
 Finally, click "Run Workflow". To see the new history with the results, click "Switch to that history" on the page that loads after running the workflow. The workflow has two main outputs: a plot of the highest-abundance species for the no sucrose condition (NS) and another plot for the with sucrose condition (WS). Again, all of the files can be viewed by clicking the eye image ![eye image](images/eye_icon.png).
 
